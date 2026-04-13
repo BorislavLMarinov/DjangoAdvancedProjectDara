@@ -1,0 +1,55 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyc
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Environment & Secrets (CRITICAL) ---
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Database ---
+# We use PostgreSQL, so we ignore the default SQLite file
+db.sqlite3
+db.sqlite3-journal
+
+# --- Media & Static ---
+# Do not upload user-uploaded images (Avatars/Tasks)
+media/
+# Do not upload collected static files (Django creates these for production)
+staticfiles/
+
+# --- IDE / Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS Specific ---
+.DS_Store
+.DS_Store?
+._*
+Thumbe.db
+desktop.ini
