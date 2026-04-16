@@ -1,0 +1,16 @@
+<nav id="site-nav">
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        
+        {% if user.is_authenticated %}
+            {% if user.is_teacher %}
+                <li><a href="{% url 'accounts:teacher-profile' pk=user.pk %}">My Teacher Profile</a></li>
+            {% elif user.is_parent %}
+                <li><a href="{% url 'accounts:parent-profile' pk=user.pk %}">My Parent Profile</a></li>
+                <li><a href="{% url 'accounts:parent-child-list' %}">Manage Children</a></li>
+            {% elif user.is_child %}
+                <li><a href="{% url 'accounts:child-profile' pk=user.pk %}">My Child Profile</a></li>
+            {% endif %}
+        {% endif %}
+    </ul>
+</nav>

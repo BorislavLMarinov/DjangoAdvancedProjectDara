@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Child Account{% else %}Add New Child Account{% endif %}
+{% endblock %}
+
+{% block content %}
+    <section class="child-form">
+        <h2>
+            {% if form.instance.pk %}
+                Edit Child: {{ form.instance.user.username }}
+            {% else %}
+                Create a Child Account
+            {% endif %}
+        </h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">
+                {% if form.instance.pk %}Save Changes{% else %}Create Child{% endif %}
+            </button>
+            <a href="{% url 'accounts:parent-child-list' %}">Back to List</a>
+        </form>
+    </section>
+{% endblock %}

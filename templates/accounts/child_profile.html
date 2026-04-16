@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Child Profile | ProjectDara{% endblock %}
+
+{% block content %}
+    <section class="profile-view">
+        <h2>Hi, {{ profile.user.username }}!</h2>
+        <div class="profile-details">
+            <p><strong>Username:</strong> {{ profile.user.username }}</p>
+            <p><strong>Age:</strong> {{ profile.user.age }}</p>
+            <p><strong>Parent:</strong> {{ profile.parent.user.username }}</p>
+        </div>
+
+        {% if is_owner %}
+            <div class="profile-actions">
+                <a href="{% url 'accounts:child-profile-edit' pk=profile.user.pk %}">Edit My Settings</a>
+                <a href="{% url 'accounts:child-profile-delete' pk=profile.user.pk %}" class="delete-link">Delete My Account</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

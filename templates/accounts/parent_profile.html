@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Parent Profile | ProjectDara{% endblock %}
+
+{% block content %}
+    <section class="profile-view">
+        <h2>Parent Profile: {{ profile.user.username }}</h2>
+        <div class="profile-details">
+            <p><strong>Username:</strong> {{ profile.user.username }}</p>
+            <p><strong>Email:</strong> {{ profile.user.email }}</p>
+            <p><strong>Age:</strong> {{ profile.user.age }}</p>
+        </div>
+
+        {% if is_owner %}
+            <div class="profile-actions">
+                <a href="{% url 'accounts:parent-profile-edit' pk=profile.user.pk %}">Edit Profile</a>
+                <a href="{% url 'accounts:parent-profile-delete' pk=profile.user.pk %}" class="delete-link">Delete Account</a>
+                <a href="{% url 'accounts:parent-child-list' %}">Manage My Children</a>
+            </div>
+        {% endif %}
+
+        <div class="children-list-preview">
+            <h3>Linked Children</h3>
+            {% if children %}
+                <ul>
+                    {% for child in children %}
+                        <li>{{ child.user.username }} (Age: {{ child.user.age }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No children linked yet.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}
