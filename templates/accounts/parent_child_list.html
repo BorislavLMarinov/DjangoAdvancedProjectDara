@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Children | ProjectDara{% endblock %}
+
+{% block content %}
+    <section class="child-management">
+        <h2>My Children</h2>
+        <div class="management-actions">
+            <a href="{% url 'accounts:parent-child-create' %}">+ Create New Child Account</a>
+        </div>
+
+        <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 1em;">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Age</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for child in children %}
+                    <tr>
+                        <td>{{ child.user.username }}</td>
+                        <td>{{ child.user.age }}</td>
+                        <td>{{ child.user.email|default:"None" }}</td>
+                        <td>
+                            <a href="{% url 'accounts:parent-child-edit' pk=child.pk %}">Edit</a> |
+                            <a href="{% url 'accounts:parent-child-delete' pk=child.pk %}">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No child accounts created yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Account | ProjectDara{% endblock %}
+
+{% block content %}
+    <section class="profile-delete">
+        <h2>⚠️ Delete Account</h2>
+        <p>Are you absolutely sure you want to delete the account for <strong>{{ target_user.username }}</strong>?</p>
+        <p>This action is <strong>permanent</strong> and cannot be undone.</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="color: red;">Yes, Permanent Delete</button>
+            <a href="{% url 'home' %}">Cancel</a>
+        </form>
+    </section>
+{% endblock %}
