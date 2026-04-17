@@ -1,7 +1,7 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from .models import AppUser, TeacherProfile, ParentProfile         #ChildProfile when todo done
+from .models import AppUser, TeacherProfile, ParentProfile, ChildProfile
 
 
 @receiver(post_save, sender=AppUser)
@@ -15,5 +15,18 @@ def create_role_profile(sender, instance, created, **kwargs):
     elif instance.is_parent and not hasattr(instance, 'parent_profile'):
         ParentProfile.objects.create(user=instance)
 
-    # TODO: Consider raising a warning log if a child user is created
-    #       without a ChildProfile, so it's easier to catch during development.
+
+@receiver(pre_delete, sender=ParentProfile)
+def delete_associated_children(sender, instance, **kwargs):
+    child_user_ids = instance.child_profiles.values_list('user_id', flat=True)
+    if child_user_ids:
+        AppUser.objects.filter(pk__in=child_user_ids).delete()
+
+
+@receiver(post_delete, sender=TeacherProfile)
+@receiver(post_delete, sender=ParentProfile)
+@receiver(post_delete, sender=ChildProfile)
+def delete_user_on_profile_delete(sender, instance, **kwargs):
+    user_id = getattr(instance, 'user_id', None)
+    if user_id:
+        AppUser.objects.filter(pk=user_id).delete()
