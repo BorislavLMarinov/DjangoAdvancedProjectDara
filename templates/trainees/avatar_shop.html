@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Avatar Shop</h1>
+        <div class="fs-4">
+            <i class="bi bi-coin text-warning"></i> <strong>{{ trainee_coins }}</strong>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for avatar in avatars %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-{{ avatar.rarity|default:'light' }}">
+                    <div class="card-img-top bg-light p-4 text-center">
+                        {% if avatar.image_url %}
+                            <img src="{{ avatar.image_url }}" alt="{{ avatar.name }}" class="img-fluid" style="max-height: 150px;">
+                        {% else %}
+                            <i class="bi bi-person-bounding-box display-1 text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ avatar.name }}</h5>
+                            <span class="badge bg-secondary text-capitalize">{{ avatar.rarity }}</span>
+                        </div>
+                        <p class="card-text text-muted small">{{ avatar.description }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 d-grid gap-2 mb-2">
+                        {% if avatar.id in owned_avatar_ids %}
+                            <button class="btn btn-outline-secondary disabled" disabled>Already Owned</button>
+                        {% else %}
+                            <form action="{% url 'trainees:avatar-purchase' avatar.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100 {% if trainee_coins < avatar.coin_cost %}disabled{% endif %}" 
+                                        {% if trainee_coins < avatar.coin_cost %}disabled{% endif %}>
+                                    Buy for {{ avatar.coin_cost }} <i class="bi bi-coin"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-5">No avatars available for purchase right now. Check back later!</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

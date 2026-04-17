@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">My Inventory</h1>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for ownership in ownerships %}
+            <div class="col">
+                <div class="card h-100 shadow-sm {% if ownership.avatar == active_avatar %}border-primary border-2{% endif %}">
+                    <div class="card-img-top bg-light p-4 text-center position-relative">
+                        {% if ownership.avatar == active_avatar %}
+                            <span class="badge bg-primary position-absolute top-0 end-0 m-2">Active</span>
+                        {% endif %}
+                        
+                        {% if ownership.avatar.image_url %}
+                            <img src="{{ ownership.avatar.image_url }}" alt="{{ ownership.avatar.name }}" class="img-fluid" style="max-height: 150px;">
+                        {% else %}
+                            <i class="bi bi-person-bounding-box display-1 text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">{{ ownership.avatar.name }}</h5>
+                        <p class="card-text text-muted small mb-2">{{ ownership.avatar.description }}</p>
+                        <small class="text-muted d-block mt-2">Acquired via {{ ownership.get_acquired_via_display }}</small>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 d-grid gap-2 mb-2">
+                        {% if ownership.avatar == active_avatar %}
+                            <button class="btn btn-primary disabled" disabled>Currently Equipped</button>
+                        {% else %}
+                            <form action="{% url 'trainees:equip-avatar' ownership.avatar.pk %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary w-100">Equip Avatar</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-5">You haven't unlocked any avatars yet. Head to the shop or complete missions to earn them!</p>
+                <a href="{% url 'trainees:avatar-shop' %}" class="btn btn-primary">Visit Shop</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
