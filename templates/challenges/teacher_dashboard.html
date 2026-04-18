@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard — Architect Control Center{% endblock %}
+
+{% block content %}
+<section id="teacher-dashboard">
+    <header class="dashboard-header">
+        <h1>Architect Control Center</h1>
+        <p>Manage and debut your new missions for the trainees.</p>
+    </header>
+
+    <div class="action-bar">
+        <h3>Debut New Mission:</h3>
+        <div class="btn-group">
+            <a href="{% url 'challenges:task-create' 'arithmetic' %}" class="btn btn-primary">Math Challenge</a>
+            <a href="{% url 'challenges:task-create' 'pattern' %}" class="btn btn-primary">Pattern Puzzle</a>
+            <a href="{% url 'challenges:task-create' 'maze' %}" class="btn btn-primary">Maze Navigation</a>
+            <a href="{% url 'challenges:task-create' 'counting' %}" class="btn btn-primary">Counting Mission</a>
+        </div>
+    </div>
+
+    <div class="mission-management-grid">
+        <!-- Math Challenges Section -->
+        <div class="mission-section">
+            <h2>Math Challenges</h2>
+            {% if maths %}
+                <ul class="mission-list">
+                    {% for math in maths %}
+                        <li class="mission-item">
+                            <div class="mission-info">
+                                <strong>{{ math.title }}</strong> 
+                                <span class="badge badge-{{ math.difficulty.name|lower }}">{{ math.difficulty.name }}</span>
+                            </div>
+                            <div class="mission-actions">
+                                <a href="{% url 'challenges:task-edit' 'arithmetic' math.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                <a href="{% url 'challenges:task-delete' 'arithmetic' math.pk %}" class="btn btn-sm btn-danger">Remove</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-msg">No math challenges debuted yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Pattern Puzzles Section -->
+        <div class="mission-section">
+            <h2>Pattern Puzzles</h2>
+            {% if patterns %}
+                <ul class="mission-list">
+                    {% for pattern in patterns %}
+                        <li class="mission-item">
+                            <div class="mission-info">
+                                <strong>{{ pattern.title }}</strong> 
+                                <span class="badge badge-{{ pattern.difficulty.name|lower }}">{{ pattern.difficulty.name }}</span>
+                            </div>
+                            <div class="mission-actions">
+                                <a href="{% url 'challenges:task-edit' 'pattern' pattern.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                <a href="{% url 'challenges:task-delete' 'pattern' pattern.pk %}" class="btn btn-sm btn-danger">Remove</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-msg">No pattern puzzles debuted yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Maze Navigations Section -->
+        <div class="mission-section">
+            <h2>Maze Navigations</h2>
+            {% if mazes %}
+                <ul class="mission-list">
+                    {% for maze in mazes %}
+                        <li class="mission-item">
+                            <div class="mission-info">
+                                <strong>{{ maze.title }}</strong> 
+                                <span class="badge badge-{{ maze.difficulty.name|lower }}">{{ maze.difficulty.name }}</span>
+                            </div>
+                            <div class="mission-actions">
+                                <a href="{% url 'challenges:task-edit' 'maze' maze.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                <a href="{% url 'challenges:task-delete' 'maze' maze.pk %}" class="btn btn-sm btn-danger">Remove</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-msg">No maze navigations debuted yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Counting Missions Section -->
+        <div class="mission-section">
+            <h2>Counting Missions</h2>
+            {% if countings %}
+                <ul class="mission-list">
+                    {% for counting in countings %}
+                        <li class="mission-item">
+                            <div class="mission-info">
+                                <strong>{{ counting.title }}</strong> 
+                                <span class="badge badge-{{ counting.difficulty.name|lower }}">{{ counting.difficulty.name }}</span>
+                            </div>
+                            <div class="mission-actions">
+                                <a href="{% url 'challenges:task-edit' 'counting' counting.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                <a href="{% url 'challenges:task-delete' 'counting' counting.pk %}" class="btn btn-sm btn-danger">Remove</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-msg">No counting missions debuted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Counting Mission — {{ task.title }}{% endblock %}
+
+{% block content %}
+<section id="counting-mission">
+    <header class="mission-header">
+        <h1>Counting Mission: {{ task.title }}</h1>
+        <p>{{ task.description }}</p>
+    </header>
+
+    <div class="mission-arena">
+        <div class="visual-card">
+            {% if task.image %}
+                <img src="{{ task.image.url }}" alt="Count these items" class="counting-image">
+            {% else %}
+                <div class="image-placeholder">No image provided for this mission.</div>
+            {% endif %}
+        </div>
+
+        <p class="instruction">How many do you see?</p>
+
+        <form method="post" id="mission-form" class="answer-grid">
+            {% csrf_token %}
+            {% for option in options %}
+                <button type="submit" name="answer" value="{{ option }}" class="btn btn-option">
+                    {{ option }}
+                </button>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="mission-footer">
+        <a href="{% url 'challenges:mission-list' %}" class="btn btn-outline">Quit Mission</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    #counting-mission .visual-card {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+    #counting-mission .counting-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: 4px solid #fff;
+    }
+    #counting-mission .instruction {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+    }
+    #counting-mission .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    #counting-mission .btn-option {
+        padding: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: bold;
+        background: #fff;
+        border: 3px solid #dee2e6;
+        transition: all 0.2s;
+    }
+    #counting-mission .btn-option:hover {
+        border-color: #007bff;
+        transform: translateY(-5px);
+        background: #f0f7ff;
+    }
+</style>
+{% endblock %}

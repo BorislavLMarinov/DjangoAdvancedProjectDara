@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Math Challenge — {{ task.title }}{% endblock %}
+
+{% block content %}
+<section id="arithmetic-mission">
+    <header class="mission-header">
+        <h1>Math Challenge: {{ task.title }}</h1>
+        <p>{{ task.description }}</p>
+    </header>
+
+    <div class="mission-arena">
+        <div class="problem-card">
+            <span class="num">{{ task.number_a }}</span>
+            <span class="op">{{ task.operation }}</span>
+            <span class="num">{{ task.number_b }}</span>
+            <span class="eq">=</span>
+            <span class="ans-placeholder">?</span>
+        </div>
+
+        <form method="post" id="mission-form" class="answer-grid">
+            {% csrf_token %}
+            {% for option in options %}
+                <button type="submit" name="answer" value="{{ option }}" class="btn btn-option">
+                    {{ option }}
+                </button>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="mission-footer">
+        <a href="{% url 'challenges:mission-list' %}" class="btn btn-outline">Quit Mission</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    #arithmetic-mission .problem-card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        font-size: 4rem;
+        font-weight: bold;
+        margin: 3rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    #arithmetic-mission .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    #arithmetic-mission .btn-option {
+        padding: 2rem;
+        font-size: 2rem;
+        font-weight: bold;
+        background: #fff;
+        border: 3px solid #dee2e6;
+        transition: all 0.2s;
+    }
+    #arithmetic-mission .btn-option:hover {
+        border-color: #007bff;
+        transform: translateY(-5px);
+        background: #f0f7ff;
+    }
+</style>
+{% endblock %}

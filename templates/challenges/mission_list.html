@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Training Ground — Select Your Mission{% endblock %}
+
+{% block content %}
+<section id="training-ground">
+    <header class="ground-header">
+        <h1>Trainee Training Ground</h1>
+        <p>Select your discipline and start your training to become a Legend.</p>
+    </header>
+
+    <div class="discipline-list">
+        {% if disciplines %}
+            {% for discipline in disciplines %}
+                <div class="discipline-section">
+                    <h2>{{ discipline.name }}</h2>
+                    <div class="mission-grid">
+                        {% for mission in discipline.missions %}
+                            <div class="mission-card card-{{ mission.difficulty.name|lower }}">
+                                <div class="mission-card-content">
+                                    <h3>{{ mission.title }}</h3>
+                                    <p class="mission-desc">{{ mission.description|truncatewords:15 }}</p>
+                                    <div class="mission-meta">
+                                        <span class="badge badge-difficulty">{{ mission.difficulty.name }}</span>
+                                        <span class="stars-award">★ {{ mission.calculate_total_points }}</span>
+                                    </div>
+                                </div>
+                                <div class="mission-card-actions">
+                                    <a href="{% url mission.get_play_url_name mission.pk %}" class="btn btn-primary btn-play">Start Mission</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>Wait! No training missions have been debuted yet by the Architects.</p>
+                <p>Check back soon, Trainee!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

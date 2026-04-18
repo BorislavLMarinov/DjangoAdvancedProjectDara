@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Decommission Mission — Architect Control Center{% endblock %}
+
+{% block content %}
+<section id="mission-decommission">
+    <header class="confirm-header">
+        <h1>Decommission {{ label }}</h1>
+        <p>Are you sure you want to permanently remove this mission?</p>
+    </header>
+
+    <div class="mission-details-card">
+        <h3>{{ task.title }}</h3>
+        <p>{{ task.description }}</p>
+        <span class="badge badge-{{ task.difficulty.name|lower }}">Difficulty: {{ task.difficulty.name }}</span>
+    </div>
+
+    <form method="post" class="decommission-form">
+        {% csrf_token %}
+        <div class="confirm-actions">
+            <button type="submit" class="btn btn-danger">Confirm Removal</button>
+            <a href="{% url 'challenges:teacher-dashboard' %}" class="btn btn-outline">Keep Mission</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
