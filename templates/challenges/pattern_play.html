@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Pattern Puzzle — {{ task.title }}{% endblock %}
+
+{% block content %}
+<section id="pattern-mission">
+    <header class="mission-header">
+        <h1>Pattern Puzzle: {{ task.title }}</h1>
+        <p>{{ task.description }}</p>
+    </header>
+
+    <div class="mission-arena">
+        <div class="sequence-card">
+            {% for item in task.sequence_data %}
+                <div class="sequence-item {% if item == '?' %}item-question{% endif %}">
+                    {{ item }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <p class="instruction">What comes in place of the "?" mark?</p>
+
+        <form method="post" id="mission-form" class="answer-grid">
+            {% csrf_token %}
+            {% for option in options %}
+                <button type="submit" name="answer" value="{{ option }}" class="btn btn-option">
+                    {{ option }}
+                </button>
+            {% endfor %}
+        </form>
+    </div>
+
+    <div class="mission-footer">
+        <a href="{% url 'challenges:mission-list' %}" class="btn btn-outline">Quit Mission</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    #pattern-mission .sequence-card {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 3rem 0;
+        flex-wrap: wrap;
+    }
+    #pattern-mission .sequence-item {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fff;
+        border: 4px solid #dee2e6;
+        border-radius: 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #495057;
+    }
+    #pattern-mission .item-question {
+        border-color: #007bff;
+        background: #e7f1ff;
+        color: #007bff;
+        font-size: 2.5rem;
+    }
+    #pattern-mission .instruction {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+    }
+    #pattern-mission .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    #pattern-mission .btn-option {
+        padding: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: #fff;
+        border: 3px solid #dee2e6;
+        transition: all 0.2s;
+    }
+    #pattern-mission .btn-option:hover {
+        border-color: #007bff;
+        transform: translateY(-5px);
+        background: #f0f7ff;
+    }
+</style>
+{% endblock %}

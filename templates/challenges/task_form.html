@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ label }} — Architect Mission Setup{% endblock %}
+
+{% block content %}
+<section id="mission-setup">
+    <header class="form-header">
+        <h1>{% if task.pk %}Update{% else %}Debut{% endif %} {{ label }}</h1>
+        <p>Configure the mission parameters for the trainees.</p>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="architect-form">
+        {% csrf_token %}
+        
+        <div class="form-group-wrapper">
+            {% for field in form %}
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-msg">
+                            {% for error in field.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">{% if task.pk %}Save Configuration{% else %}Debut Mission{% endif %}</button>
+            <a href="{% url 'challenges:teacher-dashboard' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
