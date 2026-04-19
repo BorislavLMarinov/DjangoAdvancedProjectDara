@@ -4,12 +4,27 @@
         
         {% if user.is_authenticated %}
             {% if user.is_teacher %}
-                <li><a href="{% url 'accounts:teacher-profile' pk=user.pk %}">My Teacher Profile</a></li>
+                <li><strong>Architect Panel</strong></li>
+                <li><a href="{% url 'challenges:teacher-dashboard' %}">Mission Control</a></li>
+                <li><a href="{% url 'challenges:mission-list' %}">Mission Board</a></li>
+                <li><a href="{% url 'accounts:user-list' %}">Trainee Directory</a></li>
+                <li><a href="{% url 'accounts:teacher-profile' pk=user.pk %}">My Profile</a></li>
+
             {% elif user.is_parent %}
-                <li><a href="{% url 'accounts:parent-profile' pk=user.pk %}">My Parent Profile</a></li>
+                <li><strong>Parent Center</strong></li>
                 <li><a href="{% url 'accounts:parent-child-list' %}">Manage Children</a></li>
+                <li><a href="{% url 'challenges:mission-list' %}">Mission Board</a></li>
+                <li><a href="{% url 'trainees:avatar-gallery' %}">Avatar Gallery</a></li>
+                <li><a href="{% url 'accounts:parent-profile' pk=user.pk %}">My Profile</a></li>
+
             {% elif user.is_child %}
-                <li><a href="{% url 'accounts:child-profile' pk=user.pk %}">My Child Profile</a></li>
+                <li><strong>Training Hub</strong></li>
+                <li><a href="{% url 'trainees:trainee-dashboard' %}">My Training Board</a></li>
+                <li><a href="{% url 'challenges:mission-list' %}">Mission Board</a></li>
+                <li><a href="{% url 'trainees:inventory' %}">My Inventory</a></li>
+                <li><a href="{% url 'trainees:avatar-shop' %}">Avatar Shop</a></li>
+                <li><a href="{% url 'trainees:avatar-gallery' %}">Avatar Gallery</a></li>
+                <li><a href="{% url 'accounts:child-profile' pk=user.pk %}">My Profile</a></li>
             {% endif %}
         {% endif %}
     </ul>

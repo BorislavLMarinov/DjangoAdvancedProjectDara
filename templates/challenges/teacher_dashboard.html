@@ -10,6 +10,15 @@
     </header>
 
     <div class="action-bar">
+        <div class="search-box">
+            <form method="get" action="">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search missions by title...">
+                <button type="submit" class="btn btn-sm">Search</button>
+                {% if search_query %}
+                    <a href="{% url 'challenges:teacher-dashboard' %}" class="btn btn-sm btn-outline">Clear</a>
+                {% endif %}
+            </form>
+        </div>
         <h3>Debut New Mission:</h3>
         <div class="btn-group">
             <a href="{% url 'challenges:task-create' 'arithmetic' %}" class="btn btn-primary">Math Challenge</a>

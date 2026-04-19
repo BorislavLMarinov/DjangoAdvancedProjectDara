@@ -26,7 +26,23 @@
                                     </div>
                                 </div>
                                 <div class="mission-card-actions">
-                                    <a href="{% url mission.get_play_url_name mission.pk %}" class="btn btn-primary btn-play">Start Mission</a>
+                                    {% if user.is_child %}
+                                        <a href="{% url mission.get_play_url_name mission.pk %}" class="btn btn-primary btn-play">Start Mission</a>
+                                    {% else %}
+                                        <a href="{% url mission.get_play_url_name mission.pk %}" class="btn btn-outline btn-play">Test Mission</a>
+                                        {% if user.is_teacher %}
+                                            <!-- Logic to determine task_type for editing -->
+                                            {% if 'arithmetic' in mission.get_play_url_name %}
+                                                <a href="{% url 'challenges:task-edit' 'arithmetic' mission.pk %}" class="btn btn-sm btn-outline">Manage</a>
+                                            {% elif 'pattern' in mission.get_play_url_name %}
+                                                <a href="{% url 'challenges:task-edit' 'pattern' mission.pk %}" class="btn btn-sm btn-outline">Manage</a>
+                                            {% elif 'maze' in mission.get_play_url_name %}
+                                                <a href="{% url 'challenges:task-edit' 'maze' mission.pk %}" class="btn btn-sm btn-outline">Manage</a>
+                                            {% elif 'counting' in mission.get_play_url_name %}
+                                                <a href="{% url 'challenges:task-edit' 'counting' mission.pk %}" class="btn btn-sm btn-outline">Manage</a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}

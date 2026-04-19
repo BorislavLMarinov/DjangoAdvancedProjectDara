@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
-    CreateView, UpdateView, DeleteView, DetailView, TemplateView, ListView, FormView,
+    CreateView, UpdateView, DetailView, TemplateView, ListView, FormView,
 )
 
 from .forms import (
@@ -255,7 +255,17 @@ class ParentChildListView(ParentRequiredMixin, ListView):
 
     def get_queryset(self):
         parent_profile = get_object_or_404(ParentProfile, user=self.request.user)
-        return ChildProfile.objects.filter(parent=parent_profile).select_related('user')
+        queryset = ChildProfile.objects.filter(parent=parent_profile).select_related('user')
+        
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(user__username__icontains=q)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['search_query'] = self.request.GET.get('q', '')
+        return ctx
 
 
 class ParentChildCreateView(ParentRequiredMixin, CreateView):
@@ -298,6 +308,25 @@ class ParentChildEditView(ParentRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounts:parent-child-list')
+
+
+class UserListView(TeacherRequiredMixin, ListView):
+    model = AppUser
+    template_name = 'accounts/user_list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = AppUser.objects.all().order_by('username')
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['search_query'] = self.request.GET.get('q', '')
+        return ctx
 
 
 class ParentChildDeleteView(ParentRequiredMixin, FormView):
