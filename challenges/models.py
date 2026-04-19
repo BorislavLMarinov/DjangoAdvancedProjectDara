@@ -50,6 +50,9 @@ class BaseTask_(models.Model):
     def calculate_total_points(self):
         return int(self.base_points * self.difficulty.multiplier)
 
+    @property
+    def correct_answer_value(self):
+        return getattr(self, 'correct_answer', getattr(self, 'correct_value', None))
 
     def get_all_options(self, correct_answer):
         raw_options = [correct_answer, self.choice_1, self.choice_2, self.choice_3]

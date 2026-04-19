@@ -20,4 +20,5 @@ urlpatterns = [
     path('child/<int:pk>/', views.ChildProfileView.as_view(), name='child-profile'),
     path('child/<int:pk>/edit/', views.ChildProfileEditView.as_view(), name='child-profile-edit'),
     path('child/<int:pk>/delete/', views.ChildProfileDeleteView.as_view(), name='child-profile-delete'),
+    path('users/', views.UserListView.as_view(), name='user-list'),
 ]

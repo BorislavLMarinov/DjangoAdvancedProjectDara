@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from accounts.mixins import ChildRequiredMixin
 from .models import Avatar, TraineeProfile, AvatarOwnership, TaskCompletion
+from .services import purchase_avatar, set_active_avatar
 
 
 class TraineeDashboardView(ChildRequiredMixin, TemplateView):
@@ -41,22 +42,15 @@ class AvatarShopView(ChildRequiredMixin, ListView):
 
 class AvatarPurchaseView(ChildRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
-        avatar = get_object_or_404(Avatar, pk=pk, is_active=True, unlock_type=Avatar.UnlockType.PURCHASE)
+        avatar = get_object_or_404(Avatar, pk=pk, is_active=True)
         trainee = request.user.child_profile.trainee_profile
 
-        if AvatarOwnership.objects.filter(trainee=trainee, avatar=avatar).exists():
-            messages.warning(request, f"You already own {avatar.name}!")
-            return redirect('trainees:avatar-shop')
+        result = purchase_avatar(trainee, avatar)
 
-        if trainee.spend_coins(avatar.coin_cost):
-            AvatarOwnership.objects.create(
-                trainee=trainee,
-                avatar=avatar,
-                acquired_via=AvatarOwnership.AcquiredVia.PURCHASE
-            )
+        if result['success']:
             messages.success(request, f"Congratulations! You've unlocked {avatar.name}!")
         else:
-            messages.error(request, "Not enough coins! Keep training to earn more.")
+            messages.error(request, result['error'])
 
         return redirect('trainees:avatar-shop')
 
@@ -76,13 +70,31 @@ class InventoryListView(ChildRequiredMixin, ListView):
         return context
 
 
+class AvatarGalleryView(LoginRequiredMixin, ListView):
+    model = Avatar
+    template_name = 'trainees/avatar_gallery.html'
+    context_object_name = 'avatars'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_child:
+            trainee = self.request.user.child_profile.trainee_profile
+            context['owned_avatar_ids'] = AvatarOwnership.objects.filter(
+                trainee=trainee
+            ).values_list('avatar_id', flat=True)
+        return context
+
+
 class EquipAvatarView(ChildRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         trainee = request.user.child_profile.trainee_profile
-        ownership = get_object_or_404(AvatarOwnership, trainee=trainee, avatar_id=pk)
+        avatar = get_object_or_404(Avatar, pk=pk)
         
-        trainee.active_avatar = ownership.avatar
-        trainee.save()
+        result = set_active_avatar(trainee, avatar)
         
-        messages.success(request, f"{ownership.avatar.name} equipped!")
+        if result['success']:
+            messages.success(request, f"{avatar.name} equipped!")
+        else:
+            messages.error(request, result['error'])
+            
         return redirect('trainees:inventory')

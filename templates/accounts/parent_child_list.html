@@ -5,6 +5,17 @@
 {% block content %}
     <section class="child-management">
         <h2>My Children</h2>
+        
+        <div class="search-management" style="margin-bottom: 1em;">
+            <form method="get" action="">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search child by username...">
+                <button type="submit">Search</button>
+                {% if search_query %}
+                    <a href="{% url 'accounts:parent-child-list' %}">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
         <div class="management-actions">
             <a href="{% url 'accounts:parent-child-create' %}">+ Create New Child Account</a>
         </div>

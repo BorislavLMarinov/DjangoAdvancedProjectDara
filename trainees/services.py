@@ -1,38 +1,23 @@
 from django.db import transaction
-from django.utils import timezone
 
 from .models import TraineeProfile, Avatar, AvatarOwnership, TaskCompletion
 
 # TODO: Import difficulty choices directly from challenges.models once that
 #       app is finalised, to keep a single source of truth.
-DIFFICULTY_XP_MAP = {
-    'easy':   30,
-    'medium': 60,
-    'hard':   100,
-    'expert': 150,
-}
-
-DEFAULT_XP = 30
-
-
-def xp_for_difficulty(difficulty: str) -> int:
-    return DIFFICULTY_XP_MAP.get(difficulty.lower(), DEFAULT_XP)
-
 
 @transaction.atomic
 def complete_task(trainee: TraineeProfile, task, time_taken_seconds: int) -> dict:
     if time_taken_seconds <= 0:
         return {'success': False, 'error': 'Invalid time value.'}
 
-    difficulty = getattr(task, 'difficulty', 'easy')
-    xp = xp_for_difficulty(difficulty)
+    xp = task.calculate_total_points()
     coins = xp
 
     completion = TaskCompletion.objects.create(
         trainee=trainee,
         task=task,
         time_taken_seconds=time_taken_seconds,
-        difficulty_snapshot=difficulty,
+        difficulty_snapshot=task.difficulty.name,
         xp_earned=xp,
         coins_earned=coins,
     )

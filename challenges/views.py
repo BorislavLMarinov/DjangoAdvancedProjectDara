@@ -3,8 +3,9 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import TeacherRequiredMixin, ChildRequiredMixin
-from trainees.models import TaskCompletion
+from trainees.services import complete_task
 from .models import MazeTask, ArithmeticTask, PatternChallenge, CountingTask, BaseTask
 from .forms import MazeForm, ArithmeticForm, PatternForm, CountingForm
 
@@ -21,10 +22,24 @@ class TeacherDashboardView(TeacherRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         teacher_profile = self.request.user.teacher_profile
-        context['mazes'] = MazeTask.objects.filter(created_by=teacher_profile)
-        context['maths'] = ArithmeticTask.objects.filter(created_by=teacher_profile)
-        context['patterns'] = PatternChallenge.objects.filter(created_by=teacher_profile)
-        context['countings'] = CountingTask.objects.filter(created_by=teacher_profile)
+        search_query = self.request.GET.get('q', '')
+
+        mazes = MazeTask.objects.filter(created_by=teacher_profile)
+        maths = ArithmeticTask.objects.filter(created_by=teacher_profile)
+        patterns = PatternChallenge.objects.filter(created_by=teacher_profile)
+        countings = CountingTask.objects.filter(created_by=teacher_profile)
+
+        if search_query:
+            mazes = mazes.filter(title__icontains=search_query)
+            maths = maths.filter(title__icontains=search_query)
+            patterns = patterns.filter(title__icontains=search_query)
+            countings = countings.filter(title__icontains=search_query)
+
+        context['mazes'] = mazes
+        context['maths'] = maths
+        context['patterns'] = patterns
+        context['countings'] = countings
+        context['search_query'] = search_query
         return context
 
 class BaseTaskMixin(TeacherRequiredMixin):
@@ -83,7 +98,7 @@ class TaskDeleteView(BaseTaskMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class MissionListView(ChildRequiredMixin, TemplateView):
+class MissionListView(LoginRequiredMixin, TemplateView):
     template_name = 'challenges/mission_list.html'
 
     def get_context_data(self, **kwargs):
@@ -103,13 +118,12 @@ class MissionListView(ChildRequiredMixin, TemplateView):
         return context
 
 
-class TaskPlayView(ChildRequiredMixin, DetailView):
+class TaskPlayView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         task = self.get_object()
-        correct_val = getattr(task, 'correct_answer', None) or getattr(task, 'correct_value', None)
-        context['options'] = task.get_all_options(correct_val)
+        context['options'] = task.get_all_options(task.correct_answer_value)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -117,26 +131,23 @@ class TaskPlayView(ChildRequiredMixin, DetailView):
         user_answer = request.POST.get('answer')
 
         if task.check_answer(user_answer):
-            trainee = request.user.child_profile.trainee_profile
-            points = task.calculate_total_points()
+            if request.user.is_child:
+                trainee = request.user.child_profile.trainee_profile
+                # Use the service layer logic
+                result = complete_task(trainee, task, time_taken_seconds=30)
 
-            feedback = trainee.award_xp(points)
+                msg = f"🎉 Mission Clear! You earned {result['xp_earned']} Stars!"
+                if result['levels_gained'] > 0:
+                    msg += f" LEVEL UP! You are now level {result['new_level']}!"
 
-            TaskCompletion.objects.create(
-                trainee=trainee,
-                task=task,
-                time_taken_seconds=30,  # TODO: Implement timer on frontend
-                difficulty_snapshot=task.difficulty.name,
-                xp_earned=points,
-                coins_earned=feedback['coins_gained']
-            )
-
-            msg = f"🎉 Mission Clear! You earned {points} Stars!"
-            if feedback['levels_gained'] > 0:
-                msg += f" LEVEL UP! You are now level {feedback['new_level']}!"
-
-            messages.success(request, msg)
-            return redirect('home')
+                if result['avatar_unlocked']:
+                    msg += f" 🎁 New Avatar Unlocked: {result['avatar_unlocked'].name}!"
+                
+                messages.success(request, msg)
+                return redirect('trainees:trainee-dashboard')
+            else:
+                messages.success(request, "🎉 Correct! (Testing mode: No rewards awarded for non-trainees)")
+                return redirect('challenges:mission-list')
         else:
             messages.error(request, "❌ Not quite! Review your training and try again.")
             return self.get(request, *args, **kwargs)
