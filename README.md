@@ -163,9 +163,9 @@ Before deployment:
 - configure Redis if running Celery workers
 - run `collectstatic`
 
-Deployed project URL:
+Live application:
 
-- Add your deployed URL here
+- https://projectdara.onrender.com
 
 ## Local Evaluation Checklist
 
