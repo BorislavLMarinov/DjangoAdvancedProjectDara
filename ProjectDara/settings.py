@@ -10,8 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
-from decouple import config, Csv
+
+import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +26,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+def env(key, default=None):
+    value = os.getenv(key, default)
+    if value is None:
+        raise ValueError(f'Missing required environment variable: {key}')
+    return value
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG')  #ToDo #('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []  #ToDo #config('ALLOWED_HOSTS', default='', cast=Csv())
+def env_bool(key, default=False):
+    return env(key, str(default)).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def env_list(key, default=''):
+    raw_value = env(key, default)
+    return [item.strip() for item in raw_value.split(',') if item.strip()]
+
+
+SECRET_KEY = env('SECRET_KEY')
+
+DEBUG = env_bool('DEBUG', default=False)
+
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', default='')
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS', default='')
+
+render_external_hostname = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if render_external_hostname:
+    ALLOWED_HOSTS.append(render_external_hostname)
+    CSRF_TRUSTED_ORIGINS.append(f'https://{render_external_hostname}')
+
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 
 LOCAL_APPS = [
@@ -50,6 +79,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,16 +112,22 @@ WSGI_APPLICATION = 'ProjectDara.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(database_url, conn_max_age=600, ssl_require=not DEBUG),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': env('DB_PORT'),
+        }
+    }
 
 AUTH_USER_MODEL = 'accounts.AppUser'
 
@@ -126,26 +162,26 @@ USE_I18N = True
 USE_TZ = True
 
 # Celery Configuration Options
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
+CELERY_BROKER_URL = env('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
-# Safe Mode: If Redis is missing, run tasks synchronously so the app doesn't crash
-CELERY_TASK_ALWAYS_EAGER = config('CELERY_ALWAYS_EAGER', default=True, cast=bool)
+CELERY_TASK_ALWAYS_EAGER = env_bool('CELERY_ALWAYS_EAGER', default=True)
 CELERY_TASK_EAGER_PROPAGATES = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = config('STATIC_URL')
+STATIC_URL = env('STATIC_URL')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = config('MEDIA_URL')
+MEDIA_URL = env('MEDIA_URL')
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
@@ -157,3 +193,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', default=True)
+    SECURE_HSTS_SECONDS = int(env('SECURE_HSTS_SECONDS', default='3600'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
+    SECURE_HSTS_PRELOAD = env_bool('SECURE_HSTS_PRELOAD', default=True)
+    SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', default=True)
+    CSRF_COOKIE_SECURE = env_bool('CSRF_COOKIE_SECURE', default=True)
