@@ -176,5 +176,3 @@ class MazeTask(BaseTask):
 
     def check_answer(self, user_input):
         return user_input == "stage clear"
-
-       # ToDo extra games and polish the existing ones

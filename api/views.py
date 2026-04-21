@@ -2,7 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from challenges.models import CountingTask, ArithmeticTask, PatternChallenge, MazeTask
-from .serializers import ChallengeSerializer, TraineeStatsSerializer
+from .serializers import ChallengeSerializer, TraineeStatsSerializer, BadgeSerializer
+
+class AchievementAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_child:
+            return Response({"error": "Only trainees have achievements."}, status=status.HTTP_403_FORBIDDEN)
+        
+        trainee = request.user.child_profile.trainee_profile
+        badges = trainee.badges.all()
+        serializer = BadgeSerializer(badges, many=True)
+        return Response(serializer.data)
 
 class ChallengeListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]

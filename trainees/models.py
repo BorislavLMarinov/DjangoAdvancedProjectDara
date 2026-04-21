@@ -38,8 +38,7 @@ class Avatar(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, default='')
 
-    # TODO: replace with ImageField once Pillow is configured
-    image_url = models.URLField(blank=True, default='')
+    image = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     rarity = models.CharField(
         max_length=20,
@@ -143,7 +142,6 @@ class TraineeProfile(models.Model):
         return round((self.current_xp / needed) * 100, 1)
 
     def award_xp(self, amount: int) -> dict:
-        # TODO: Hook into Celery task for async badge/achievement checks.
         if amount <= 0:
             return {'xp_gained': 0, 'coins_gained': 0, 'levels_gained': 0}
 
