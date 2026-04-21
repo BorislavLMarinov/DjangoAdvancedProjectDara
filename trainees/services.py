@@ -2,8 +2,6 @@ from django.db import transaction
 
 from .models import TraineeProfile, Avatar, AvatarOwnership, TaskCompletion
 
-# TODO: Import difficulty choices directly from challenges.models once that
-#       app is finalised, to keep a single source of truth.
 
 @transaction.atomic
 def complete_task(trainee: TraineeProfile, task, time_taken_seconds: int) -> dict:
@@ -23,6 +21,9 @@ def complete_task(trainee: TraineeProfile, task, time_taken_seconds: int) -> dic
     )
 
     level_result = trainee.award_xp(xp)
+
+    from achievements.tasks import check_achievements_async
+    check_achievements_async.delay(trainee.id, task.id, time_taken_seconds)
 
     avatar_unlocked = _check_achievement_unlock(trainee, task, completion)
 
@@ -48,7 +49,6 @@ def _check_achievement_unlock(trainee: TraineeProfile, task, completion: TaskCom
     except Avatar.DoesNotExist:
         return None
     except Avatar.MultipleObjectsReturned:
-        # TODO: Handle multi-avatar grants when that UX is designed
         avatar = Avatar.objects.filter(
             unlock_type=Avatar.UnlockType.ACHIEVEMENT,
             required_task=task,
@@ -139,7 +139,6 @@ def remove_active_avatar(trainee: TraineeProfile) -> dict:
 
 @transaction.atomic
 def claim_limited_avatar(trainee: TraineeProfile, avatar: Avatar) -> dict:
-    # TODO: Add optional coin cost to limited-time avatars if desired.
     if avatar.unlock_type != Avatar.UnlockType.LIMITED_TIME:
         return {'success': False, 'error': 'This avatar is not a limited-time avatar.'}
 
