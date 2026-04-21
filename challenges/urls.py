@@ -6,6 +6,10 @@ app_name = 'challenges'
 urlpatterns = [
     # Teacher Management
     path('dashboard/', views.TeacherDashboardView.as_view(), name='teacher-dashboard'),
+    path('difficulty/create/', views.DifficultyLevelCreateView.as_view(), name='difficulty-create'),
+    path('difficulty/<int:pk>/edit/', views.DifficultyLevelEditView.as_view(), name='difficulty-edit'),
+    path('difficulty/<int:pk>/delete/', views.DifficultyLevelDeleteView.as_view(), name='difficulty-delete'),
+
     path('<str:task_type>/create/', views.TaskCreateView.as_view(), name='task-create'),
     path('<str:task_type>/<int:pk>/edit/', views.TaskEditView.as_view(), name='task-edit'),
     path('<str:task_type>/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task-delete'),

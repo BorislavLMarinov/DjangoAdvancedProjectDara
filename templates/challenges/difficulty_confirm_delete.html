@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Remove Difficulty — Architect Control Center{% endblock %}
+
+{% block content %}
+<section id="decommission-difficulty">
+    <div class="confirm-card">
+        <h1>Remove Difficulty Level?</h1>
+        <p class="warning-text">Are you sure you want to remove <strong>{{ object.name }}</strong>?</p>
+        <p class="sub-text">This action cannot be undone. Note: You cannot remove a difficulty that is currently assigned to active missions.</p>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="confirm-actions">
+                <button type="submit" class="btn btn-danger">Confirm Removal</button>
+                <a href="{% url 'challenges:teacher-dashboard' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

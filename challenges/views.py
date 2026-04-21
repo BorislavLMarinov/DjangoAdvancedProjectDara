@@ -1,3 +1,4 @@
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -6,8 +7,8 @@ from django.views.generic import TemplateView, DetailView, CreateView, UpdateVie
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import TeacherRequiredMixin, ChildRequiredMixin
 from trainees.services import complete_task
-from .models import MazeTask, ArithmeticTask, PatternChallenge, CountingTask, BaseTask
-from .forms import MazeForm, ArithmeticForm, PatternForm, CountingForm
+from .models import MazeTask, ArithmeticTask, PatternChallenge, CountingTask, BaseTask, DifficultyLevel
+from .forms import MazeForm, ArithmeticForm, PatternForm, CountingForm, DifficultyLevelForm
 
 TASK_MAP = {
     'maze': {'model': MazeTask, 'form_class': MazeForm, 'label': 'Maze Navigation'},
@@ -28,19 +29,57 @@ class TeacherDashboardView(TeacherRequiredMixin, TemplateView):
         maths = ArithmeticTask.objects.filter(created_by=teacher_profile)
         patterns = PatternChallenge.objects.filter(created_by=teacher_profile)
         countings = CountingTask.objects.filter(created_by=teacher_profile)
+        difficulties = DifficultyLevel.objects.all()
 
         if search_query:
             mazes = mazes.filter(title__icontains=search_query)
             maths = maths.filter(title__icontains=search_query)
             patterns = patterns.filter(title__icontains=search_query)
             countings = countings.filter(title__icontains=search_query)
+            difficulties = difficulties.filter(name__icontains=search_query)
 
         context['mazes'] = mazes
         context['maths'] = maths
         context['patterns'] = patterns
         context['countings'] = countings
+        context['difficulties'] = difficulties
         context['search_query'] = search_query
         return context
+
+class DifficultyLevelCreateView(TeacherRequiredMixin, CreateView):
+    model = DifficultyLevel
+    form_class = DifficultyLevelForm
+    template_name = 'challenges/difficulty_form.html'
+    success_url = reverse_lazy('challenges:teacher-dashboard')
+
+    def form_valid(self, form):
+        messages.success(self.request, f"New difficulty level '{form.instance.name}' created!")
+        return super().form_valid(form)
+
+class DifficultyLevelEditView(TeacherRequiredMixin, UpdateView):
+    model = DifficultyLevel
+    form_class = DifficultyLevelForm
+    template_name = 'challenges/difficulty_form.html'
+    success_url = reverse_lazy('challenges:teacher-dashboard')
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Difficulty level '{form.instance.name}' updated.")
+        return super().form_valid(form)
+
+class DifficultyLevelDeleteView(TeacherRequiredMixin, DeleteView):
+    model = DifficultyLevel
+    template_name = 'challenges/difficulty_confirm_delete.html'
+    success_url = reverse_lazy('challenges:teacher-dashboard')
+
+    def delete(self, request, *args, **kwargs):
+        difficulty = self.get_object()
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.error(request, f"Difficulty level '{difficulty.name}' removed.")
+            return response
+        except models.ProtectedError:
+            messages.error(request, f"Cannot delete '{difficulty.name}' because it is being used by missions.")
+            return redirect('challenges:teacher-dashboard')
 
 class BaseTaskMixin(TeacherRequiredMixin):
     context_object_name = 'task'

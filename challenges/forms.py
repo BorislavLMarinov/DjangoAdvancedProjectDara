@@ -1,6 +1,14 @@
 from django import forms
-from .models import MazeTask, ArithmeticTask, PatternChallenge, CountingTask
+from .models import MazeTask, ArithmeticTask, PatternChallenge, CountingTask, DifficultyLevel
 
+
+class DifficultyLevelForm(forms.ModelForm):
+    class Meta:
+        model = DifficultyLevel
+        fields = ['name', 'multiplier', 'color_code']
+        widgets = {
+            'color_code': forms.TextInput(attrs={'type': 'color'}),
+        }
 
 class MazeForm(forms.ModelForm):
     class Meta:

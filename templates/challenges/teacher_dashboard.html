@@ -25,10 +25,34 @@
             <a href="{% url 'challenges:task-create' 'pattern' %}" class="btn btn-primary">Pattern Puzzle</a>
             <a href="{% url 'challenges:task-create' 'maze' %}" class="btn btn-primary">Maze Navigation</a>
             <a href="{% url 'challenges:task-create' 'counting' %}" class="btn btn-primary">Counting Mission</a>
+            <a href="{% url 'challenges:difficulty-create' %}" class="btn btn-secondary">New Difficulty</a>
         </div>
     </div>
 
     <div class="mission-management-grid">
+        <!-- Difficulty Levels Section -->
+        <div class="mission-section">
+            <h2>Difficulty Levels</h2>
+            {% if difficulties %}
+                <ul class="mission-list">
+                    {% for difficulty in difficulties %}
+                        <li class="mission-item">
+                            <div class="mission-info">
+                                <strong style="color: {{ difficulty.color_code }}">{{ difficulty.name }}</strong> 
+                                <span class="badge" style="background-color: {{ difficulty.color_code }}">x{{ difficulty.multiplier }}</span>
+                            </div>
+                            <div class="mission-actions">
+                                <a href="{% url 'challenges:difficulty-edit' difficulty.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                                <a href="{% url 'challenges:difficulty-delete' difficulty.pk %}" class="btn btn-sm btn-danger">Remove</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-msg">No difficulty levels defined.</p>
+            {% endif %}
+        </div>
+
         <!-- Math Challenges Section -->
         <div class="mission-section">
             <h2>Math Challenges</h2>

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Difficulty Setup — Architect Control Center{% endblock %}
+
+{% block content %}
+<section id="difficulty-setup">
+    <header class="form-header">
+        <h1>{% if object.pk %}Update{% else %}Create{% endif %} Difficulty Level</h1>
+        <p>Define the multiplier and visual theme for mission difficulty.</p>
+    </header>
+
+    <form method="post" class="architect-form">
+        {% csrf_token %}
+        
+        <div class="form-group-wrapper">
+            {% for field in form %}
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-msg">
+                            {% for error in field.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">{% if object.pk %}Save Changes{% else %}Create Difficulty{% endif %}</button>
+            <a href="{% url 'challenges:teacher-dashboard' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
