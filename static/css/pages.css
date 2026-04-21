@@ -1,0 +1,88 @@
+/* Page Specific Styles */
+
+/* Mission Board */
+body.missions-page {
+    background-image: url('../images/backgrounds/bg-missions.jpg');
+}
+
+#training-ground {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+    padding: 3rem;
+    min-height: 80vh;
+    backdrop-filter: blur(5px);
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Gameplay Container (Centered Task) */
+.gameplay-container {
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid var(--neon-blue);
+    box-shadow: 0 0 30px var(--neon-blue);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 1000px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Counting Task Layout */
+.counting-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    height: 100%;
+}
+
+.counting-image-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+    text-align: center;
+}
+
+.counting-image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.counting-question-container {
+    flex: 1;
+    min-width: 300px;
+    text-align: left;
+}
+
+/* Error Pages */
+body.error-404 { background-image: url('../images/backgrounds/bg-404.jpg'); }
+body.error-500 { background-image: url('../images/backgrounds/bg-500.jpg'); }
+body.error-403 { background-image: url('../images/backgrounds/bg-403.jpg'); }
+body.error-400 { background-image: url('../images/backgrounds/bg-400.jpg'); }
+
+.error-page-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4rem;
+    border-radius: 30px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dashboards */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}

@@ -1,134 +1,121 @@
 {% extends 'base.html' %}
 
-{% block title %}Maze Navigation — {{ task.title }}{% endblock %}
+{% block body_class %}stage-mode{% endblock %}
 
 {% block content %}
-<section id="maze-mission">
-    <header class="mission-header">
-        <h1>Maze Navigation: {{ task.title }}</h1>
-        <p>{{ task.description }}</p>
-    </header>
+<div class="gameplay-container text-center">
+    <h1 class="mission-title mb-4">{{ task.title }}</h1>
+    <p class="mission-instruction mb-4">{{ task.description }}</p>
 
-    <div class="mission-arena">
-        <div id="maze-container">
-            <!-- Maze will be rendered here via JS -->
-            <canvas id="maze-canvas"></canvas>
+    <div id="maze-stage" class="mb-4" style="display: flex; justify-content: center; align-items: center; flex-grow: 1; position: relative;">
+        <div id="maze-grid" style="
+            display: grid; 
+            grid-template-columns: repeat({{ grid_json.0|length }}, 50px);
+            grid-gap: 4px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--neon-blue);
+            position: relative;
+        ">
+            {% for row in grid_json %}
+                {% for cell in row %}
+                    <div class="maze-cell" id="cell-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" style="
+                        width: 50px; 
+                        height: 50px; 
+                        border-radius: 4px;
+                        background: {% if cell == 1 %}var(--neon-pink){% else %}rgba(0,0,0,0.5){% endif %};
+                        box-shadow: {% if cell == 1 %}0 0 10px var(--neon-pink){% else %}none{% endif %};
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">
+                        {% if forloop.parentloop.counter0 == task.end_row and forloop.counter0 == task.end_col %}
+                            <div style="color: var(--neon-yellow); font-size: 1.5rem; filter: drop-shadow(0 0 5px var(--neon-yellow));">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- The Trainee Ball -->
+            <div id="trainee-ball" style="
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                background: var(--neon-green);
+                border-radius: 50%;
+                box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+                transition: all 0.15s ease;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                top: calc({{ task.start_row }} * 54px + 15px);
+                left: calc({{ task.start_col }} * 54px + 15px);
+            ">
+                <i class="bi bi-person-fill" style="color: black; font-size: 1.2rem;"></i>
+            </div>
         </div>
-
-        <div class="mission-controls">
-            <p>Use <strong>Arrow Keys</strong> to reach the Stage Exit!</p>
-        </div>
-
-        <form method="post" id="completion-form" style="display: none;">
-            {% csrf_token %}
-            <input type="hidden" name="answer" value="stage clear">
-        </form>
     </div>
 
-    <div class="mission-footer">
-        <a href="{% url 'challenges:mission-list' %}" class="btn btn-outline">Quit Mission</a>
+    <form method="post" id="maze-form" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="answer" value="stage clear">
+    </form>
+
+    <div class="mt-4">
+        <p class="text-muted mb-3 small">Use Arrow Keys to Navigate</p>
+        <a href="{% url 'challenges:mission-list' %}" class="btn btn-sm btn-outline"><i class="bi bi-x-circle"></i> Quit Mission</a>
     </div>
-</section>
+</div>
 
-{{ grid_json|json_script:"maze-data" }}
-{% endblock %}
-
-{% block extra_head %}
-<style>
-    #maze-mission #maze-container {
-        display: flex;
-        justify-content: center;
-        margin: 2rem 0;
-        background: #343a40;
-        padding: 1rem;
-        border-radius: 1rem;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    #maze-mission #maze-canvas {
-        background: #fff;
-        border: 2px solid #000;
-    }
-    #maze-mission .mission-controls {
-        text-align: center;
-        font-size: 1.2rem;
-        color: #6c757d;
-    }
-</style>
-{% endblock %}
-
-{% block extra_js %}
 <script>
-    const grid = JSON.parse(document.getElementById('maze-data').textContent);
-    const canvas = document.getElementById('maze-canvas');
-    const ctx = canvas.getContext('2d');
+    const grid = {{ grid_json|safe }};
+    const startRow = {{ task.start_row }};
+    const startCol = {{ task.start_col }};
+    const endRow = {{ task.end_row }};
+    const endCol = {{ task.end_col }};
     
-    const ROWS = grid.length;
-    const COLS = grid[0].length;
-    const TILE_SIZE = 40;
-    
-    canvas.width = COLS * TILE_SIZE;
-    canvas.height = ROWS * TILE_SIZE;
-    
-    let playerPos = { row: {{ task.start_row }}, col: {{ task.start_col }} };
-    const goalPos = { row: {{ task.end_row }}, col: {{ task.end_col }} };
-    
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-                if (grid[r][c] === 1) {
-                    ctx.fillStyle = '#343a40'; // Wall
-                } else {
-                    ctx.fillStyle = '#f8f9fa'; // Path
-                }
-                ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                ctx.strokeStyle = '#dee2e6';
-                ctx.strokeRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            }
+    let currentRow = startRow;
+    let currentCol = startCol;
+
+    const ball = document.getElementById('trainee-ball');
+    const form = document.getElementById('maze-form');
+
+    function updateBallPosition() {
+        // 54px is cell width(50) + gap(4)
+        ball.style.top = (currentRow * 54 + 15) + 'px';
+        ball.style.left = (currentCol * 54 + 15) + 'px';
+
+        if (currentRow === endRow && currentCol === endCol) {
+            setTimeout(() => {
+                form.submit();
+            }, 300);
         }
-        
-        // Draw Goal
-        ctx.fillStyle = '#28a745';
-        ctx.fillRect(goalPos.col * TILE_SIZE + 5, goalPos.row * TILE_SIZE + 5, TILE_SIZE - 10, TILE_SIZE - 10);
-        
-        // Draw Player
-        ctx.fillStyle = '#007bff';
-        ctx.beginPath();
-        ctx.arc(
-            playerPos.col * TILE_SIZE + TILE_SIZE / 2,
-            playerPos.row * TILE_SIZE + TILE_SIZE / 2,
-            TILE_SIZE / 3, 0, Math.PI * 2
-        );
-        ctx.fill();
     }
-    
-    window.addEventListener('keydown', (e) => {
-        let newRow = playerPos.row;
-        let newCol = playerPos.col;
-        
+
+    window.addEventListener('keydown', function(e) {
+        let newRow = currentRow;
+        let newCol = currentCol;
+
         if (e.key === 'ArrowUp') newRow--;
-        if (e.key === 'ArrowDown') newRow++;
-        if (e.key === 'ArrowLeft') newCol--;
-        if (e.key === 'ArrowRight') newCol++;
-        
-        // Bounds and Wall Check
-        if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
+        else if (e.key === 'ArrowDown') newRow++;
+        else if (e.key === 'ArrowLeft') newCol--;
+        else if (e.key === 'ArrowRight') newCol++;
+        else return;
+
+        // Boundary check
+        if (newRow >= 0 && newRow < grid.length && newCol >= 0 && newCol < grid[0].length) {
+            // Wall check (0 is path, 1 is wall)
             if (grid[newRow][newCol] === 0) {
-                playerPos = { row: newRow, col: newCol };
-                draw();
-                checkWin();
+                currentRow = newRow;
+                currentCol = newCol;
+                updateBallPosition();
             }
         }
+        e.preventDefault();
     });
-    
-    function checkWin() {
-        if (playerPos.row === goalPos.row && playerPos.col === goalPos.col) {
-            alert('🎉 Goal Reached! Stage Clear!');
-            document.getElementById('completion-form').submit();
-        }
-    }
-    
-    draw();
 </script>
 {% endblock %}

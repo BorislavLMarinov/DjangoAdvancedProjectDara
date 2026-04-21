@@ -52,7 +52,11 @@ class BaseTask_(models.Model):
 
     @property
     def correct_answer_value(self):
-        return getattr(self, 'correct_answer', getattr(self, 'correct_value', None))
+        if hasattr(self, 'correct_value') and self.correct_value is not None:
+            return self.correct_value
+        if hasattr(self, 'correct_answer') and self.correct_answer is not None:
+            return self.correct_answer
+        return "No Answer"
 
     def get_all_options(self, correct_answer):
         raw_options = [correct_answer, self.choice_1, self.choice_2, self.choice_3]
@@ -155,9 +159,14 @@ class PatternChallenge(BaseTask):
         verbose_name_plural = "Pattern Puzzles"
 
     def clean(self):
+        super().clean()
+        if not self.sequence_data:
+            return
         if '?' not in self.sequence_data:
             raise ValidationError("Sequence must contain a '?' placeholder.")
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
     def check_answer(self, user_input):
         return str(user_input).strip().lower() == str(self.correct_value).strip().lower()

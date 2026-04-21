@@ -1,0 +1,121 @@
+/* Main Layout Structure */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#site-header {
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid var(--neon-pink);
+    padding: 1rem 2rem;
+    box-shadow: 0 0 15px var(--neon-pink);
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#layout-container {
+    display: grid;
+    grid-template-areas: "nav main aside";
+    grid-template-columns: 240px 1fr 280px;
+    flex-grow: 1;
+}
+
+#site-nav {
+    grid-area: nav;
+    background: rgba(20, 20, 20, 0.9);
+    border-right: 1px solid rgba(255, 0, 122, 0.3);
+    padding: 1.5rem;
+}
+
+#site-nav ul li {
+    margin-bottom: 0.8rem;
+}
+
+#site-nav a {
+    display: block;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+#site-nav a:hover {
+    background: rgba(255, 0, 122, 0.1);
+}
+
+#main-content {
+    grid-area: main;
+    padding: 2rem;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#site-aside {
+    grid-area: aside;
+    background: rgba(20, 20, 20, 0.9);
+    border-left: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 1.5rem;
+}
+
+#site-footer {
+    background: rgba(0, 0, 0, 0.9);
+    border-top: 1px solid var(--neon-blue);
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Stage Mode (Gameplay) */
+body.stage-mode {
+    overflow: hidden;
+    background-image: url('../images/backgrounds/bg-gameplay.jpg');
+}
+
+body.stage-mode #site-header,
+body.stage-mode #site-nav,
+body.stage-mode #site-aside,
+body.stage-mode #site-footer {
+    display: none;
+}
+
+body.stage-mode #layout-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+}
+
+body.stage-mode #main-content {
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    #layout-container {
+        grid-template-areas: 
+            "nav main"
+            "nav aside";
+        grid-template-columns: 200px 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    #layout-container {
+        grid-template-areas: 
+            "nav"
+            "main"
+            "aside";
+        grid-template-columns: 1fr;
+    }
+}

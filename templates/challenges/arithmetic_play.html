@@ -1,73 +1,34 @@
 {% extends 'base.html' %}
 
-{% block title %}Math Challenge — {{ task.title }}{% endblock %}
+{% block body_class %}stage-mode{% endblock %}
 
 {% block content %}
-<section id="arithmetic-mission">
-    <header class="mission-header">
-        <h1>Math Challenge: {{ task.title }}</h1>
-        <p>{{ task.description }}</p>
-    </header>
+<div class="gameplay-container text-center">
+    <h1 class="mission-title mb-4">{{ task.title }}</h1>
+    <p class="mission-instruction mb-5">{{ task.description }}</p>
 
-    <div class="mission-arena">
-        <div class="problem-card">
-            <span class="num">{{ task.number_a }}</span>
-            <span class="op">{{ task.operation }}</span>
-            <span class="num">{{ task.number_b }}</span>
-            <span class="eq">=</span>
-            <span class="ans-placeholder">?</span>
-        </div>
+    <div class="arithmetic-expression mb-5" style="font-size: 5rem; font-weight: 800; color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue);">
+        {{ task.number_a }} {{ task.operation }} {{ task.number_b }} = 
+        {% if not user.is_child %}
+            <span class="text-success">{{ task.correct_answer_value }}</span>
+        {% else %}
+            ?
+        {% endif %}
+    </div>
 
-        <form method="post" id="mission-form" class="answer-grid">
-            {% csrf_token %}
+    <form method="post" style="max-width: 600px; margin: 0 auto;">
+        {% csrf_token %}
+        <div class="options-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
             {% for option in options %}
-                <button type="submit" name="answer" value="{{ option }}" class="btn btn-option">
+                <button type="submit" name="answer" value="{{ option }}" class="btn btn-outline py-4 fs-2 fw-bold">
                     {{ option }}
                 </button>
             {% endfor %}
-        </form>
-    </div>
+        </div>
+    </form>
 
-    <div class="mission-footer">
-        <a href="{% url 'challenges:mission-list' %}" class="btn btn-outline">Quit Mission</a>
+    <div class="mt-5">
+        <a href="{% url 'challenges:mission-list' %}" class="btn btn-sm btn-outline"><i class="bi bi-x-circle"></i> Quit Mission</a>
     </div>
-</section>
-{% endblock %}
-
-{% block extra_head %}
-<style>
-    #arithmetic-mission .problem-card {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1.5rem;
-        font-size: 4rem;
-        font-weight: bold;
-        margin: 3rem 0;
-        padding: 2rem;
-        background: #f8f9fa;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    #arithmetic-mission .answer-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    #arithmetic-mission .btn-option {
-        padding: 2rem;
-        font-size: 2rem;
-        font-weight: bold;
-        background: #fff;
-        border: 3px solid #dee2e6;
-        transition: all 0.2s;
-    }
-    #arithmetic-mission .btn-option:hover {
-        border-color: #007bff;
-        transform: translateY(-5px);
-        background: #f0f7ff;
-    }
-</style>
+</div>
 {% endblock %}
