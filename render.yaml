@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: projectdara
+    runtime: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn ProjectDara.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.14
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: projectdara-db
+          property: connectionString
+      - key: MEDIA_URL
+        value: /media/
+      - key: STATIC_URL
+        value: /static/
+      - key: REDIS_URL
+        value: redis://localhost:6379/0
+      - key: CELERY_ALWAYS_EAGER
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "3600"
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "True"
+      - key: SECURE_HSTS_PRELOAD
+        value: "True"
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+
+databases:
+  - name: projectdara-db
+    databaseName: projectdara
+    user: projectdara
+    plan: free
