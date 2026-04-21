@@ -1,6 +1,69 @@
-<aside id="site-aside">
-    <section class="aside-section">
-        <h3>Information</h3>
-        <p>Welcome to ProjectDara. This area will show updates or quick links later.</p>
-    </section>
+<aside id="site-aside" class="p-3 bg-light border-start">
+    <div class="aside-content">
+        {% if aside_stats.type == 'trainee' %}
+            <section class="stats-section mb-4">
+                <h4 class="border-bottom pb-2">Trainee Stats</h4>
+                <div class="mb-2">
+                    <strong>Level:</strong> <span class="badge bg-primary">{{ aside_stats.level }}</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Coins:</strong> <span class="text-warning"><i class="bi bi-coin"></i> {{ aside_stats.coins }}</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Missions Clear:</strong> <span>{{ aside_stats.completions_count }}</span>
+                </div>
+                <div class="progress mt-2" style="height: 10px;">
+                    <div class="progress-bar bg-info" style="width: {{ aside_stats.xp_percent }}%"></div>
+                </div>
+                <small class="text-muted">XP Progress</small>
+            </section>
+            
+            <section class="quick-links">
+                <h5>Shortcuts</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'challenges:mission-list' %}" class="btn btn-sm btn-link p-0">Next Mission</a></li>
+                    <li><a href="{% url 'trainees:avatar-shop' %}" class="btn btn-sm btn-link p-0">Spend Coins</a></li>
+                </ul>
+            </section>
+
+        {% elif aside_stats.type == 'teacher' %}
+            <section class="stats-section mb-4">
+                <h4 class="border-bottom pb-2">Architect Intel</h4>
+                <div class="mb-2">
+                    <strong>Missions Debuted:</strong> <span class="badge bg-dark">{{ aside_stats.missions_created }}</span>
+                </div>
+                <p class="small text-muted">Keep creating challenges to train the next generation of Legends!</p>
+            </section>
+            <section class="quick-links">
+                <h5>Actions</h5>
+                <a href="{% url 'challenges:task-create' 'arithmetic' %}" class="btn btn-sm btn-primary w-100 mb-1">New Math</a>
+                <a href="{% url 'accounts:user-list' %}" class="btn btn-sm btn-outline-secondary w-100">Review Trainees</a>
+            </section>
+
+        {% elif aside_stats.type == 'parent' %}
+            <section class="stats-section mb-4">
+                <h4 class="border-bottom pb-2">Parent Center</h4>
+                <div class="mb-2">
+                    <strong>Active Children:</strong> <span class="badge bg-success">{{ aside_stats.children_count }}</span>
+                </div>
+            </section>
+            <section class="quick-links">
+                <h5>Shortcuts</h5>
+                <a href="{% url 'accounts:parent-child-create' %}" class="btn btn-sm btn-success w-100 mb-1">Add Child</a>
+                <a href="{% url 'accounts:parent-child-list' %}" class="btn btn-sm btn-outline-primary w-100">Manage Squad</a>
+            </section>
+
+        {% else %}
+            <section class="stats-section">
+                <h4 class="border-bottom pb-2">Public Info</h4>
+                <div class="mb-3">
+                    <strong>Available Missions:</strong> <span class="badge bg-secondary">{{ aside_stats.total_missions }}</span>
+                </div>
+                <div class="alert alert-info py-2 small">
+                    Join ProjectDara to start your trainee journey and earn legendary avatars!
+                </div>
+                <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-primary w-100">Join Now</a>
+            </section>
+        {% endif %}
+    </div>
 </aside>
