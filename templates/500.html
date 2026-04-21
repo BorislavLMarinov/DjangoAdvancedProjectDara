@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}500 - Stage Malfunction{% endblock %}
+{% block content %}
+<div class="error-container text-center py-5">
+    <div class="error-icon mb-4">
+        <i class="bi bi-lightning-charge-fill text-danger" style="font-size: 5rem;"></i>
+    </div>
+    <h1 class="display-1 fw-bold text-danger">500</h1>
+    <h2>Stage Malfunction!</h2>
+    <p class="lead">The lights blew out or the sound system crashed. The Architects are already fixing the equipment!</p>
+    <p>Please try refreshing the stage in a few moments.</p>
+    <div class="mt-4">
+        <a href="{% url 'home' %}" class="btn btn-danger">Emergency Exit to Home</a>
+    </div>
+</div>
+{% endblock %}

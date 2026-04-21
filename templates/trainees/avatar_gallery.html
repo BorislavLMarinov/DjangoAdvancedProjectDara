@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load trainee_extras %}
 
 {% block content %}
 <div class="container py-4">
@@ -25,7 +26,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title mb-0">{{ avatar.name }}</h5>
-                            <span class="badge bg-secondary text-capitalize">{{ avatar.rarity }}</span>
+                            {{ avatar.rarity|rarity_badge }}
                         </div>
                         <p class="card-text text-muted small">{{ avatar.description }}</p>
                         
